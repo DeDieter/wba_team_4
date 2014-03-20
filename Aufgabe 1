@@ -16,7 +16,7 @@ var planeten =  [
                  ];
 
 server.on('request', function(req, res)
-          {
+{
           console.log('HTTP-Request gestartet')
           console.log('HTTP-Methode: '+req.method);
           
@@ -25,15 +25,15 @@ server.on('request', function(req, res)
           res.write("<tr><td>------------</td><td>----------------</td><td>-------------</td></tr>");
           
           planeten.forEach(function(planet)
-                           {
-                           res.write("<tr><td> | "+  planet.name         +"</td>");
-                           res.write("<td> | "+      planet.abstand      +"</td>");
-                           res.write("<td> | "+      planet.durchmesser  +"</td></tr>");
-                           });
+          {
+                  res.write("<tr><td> | "+  planet.name         +"</td>");
+                  res.write("<td> | "+      planet.abstand      +"</td>");
+                  res.write("<td> | "+      planet.durchmesser  +"</td></tr>");
+          });
           
           res.write("</table></html>");
           res.end();
           
-          });
+});
 
 server.listen(8888);

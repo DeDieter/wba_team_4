@@ -1,6 +1,6 @@
 var http = require('http');
 var server = http.createServer();
-var	url	=	require('url');	
+var url = require('url');	
 
 
 var planeten =  [

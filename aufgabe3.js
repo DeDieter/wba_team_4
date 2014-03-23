@@ -22,7 +22,7 @@ server.on('request', function(req, res)
     
           var pfad=url.parse(req.url).pathname;	
         
-            if(pfad=="/planeten"){
+          if(pfad=="/planeten"){
     
           res.writeHead(200, "OK", {'Content-Type': 'text/html'});
           res.write("<html><table><tr><td> | Name</td><td> | Abstand</td><td> | Durchmesser</td></tr>");
@@ -42,11 +42,11 @@ server.on('request', function(req, res)
           res.write("<label>Abstand zur Sonne</label><input type='text' name='Abstand' value=''/></br>");
           res.write("<input type='submit' value='Senden' />");    
           res.write("</form>");
-              
           
-            res.write("</html>");
-            }else{
-            res.write('Planeten gibts unter /planeten');
+          res.write("</html>");
+            }
+          else{
+          res.write('Planeten gibts unter /planeten');
         
             }
           res.end();

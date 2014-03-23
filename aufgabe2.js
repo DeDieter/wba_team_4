@@ -1,7 +1,7 @@
 var http = require('http');
 var server = http.createServer();
 var	url	=	require('url');	
-
+url.resolve('http://localhost:8888', '/one');
 
 var planeten =  [
                  {name: "Merkur", abstand: "58000000", durchmesser: "4840"},

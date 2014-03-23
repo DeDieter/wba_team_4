@@ -1,7 +1,7 @@
 var http = require('http');
 var server = http.createServer();
 var querystring = require('querystring');
-var	url	=	require('url');
+var url = require('url');
 
 var planet = [
               {name: "Merkur", abstand: "58000000", durchmesser: "4840"},
@@ -22,6 +22,7 @@ server.on('request',function(req, res)
           
           var body = '';
           
+          //Neuer Planet wird in das "planeten"-Array hinzugefügt
           req.on('data', function(data){
                  body = body + data.toString();
                  var daten = querystring.parse(body);
@@ -32,8 +33,10 @@ server.on('request',function(req, res)
                  
                  var pfad = url.parse(req.url).pathname;
                  
+                 //Wenn man sich nicht auf der richten Seite für das Formular befindet ...
                  if(pfad=="/planeten"){
                  
+                 //Tabelle wird gefüllt
                  res.writeHead(200, "OK", {'Content-Type': 'text/html'});
                  res.write("<html><table border = '1'><tr><td>Name</td><td>Abstand</td><td>Durchmesser</td></tr>");
                  res.write("<tr><td></td><td></td><td></td></tr>");
@@ -46,6 +49,7 @@ server.on('request',function(req, res)
                                 });
                  res.write("</table>");
                  
+                 //Formular mit Planeten hinzufügen
                  res.write("<form action='http://localhost:8888/planeten' method='POST'>");
                  res.write("<label>Planet</label><input type='text' name='name' value=''/></br>");
                  res.write("<label>Abstand zur Sonne</label><input type='text' name='abstand' value=''/></br>");
@@ -54,7 +58,8 @@ server.on('request',function(req, res)
                  res.write("</form>");
                  
                  res.write("</html>");      
-                 } 
+                 }
+                 //Falls man sich nicht auf der richten Seite für das Formular befindet ...
                  else{
                  res.write('Planeten gibts unter /planeten');
                  }

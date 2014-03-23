@@ -2,4 +2,4 @@ wba_team_4
 ==========
 
 
-Die Datei "Aufgabe 4" enthält Aufgabe 1 - 4
+Die Datei "aufgabe4.js" enthält Aufgabe 1 - 4

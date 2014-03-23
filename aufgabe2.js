@@ -1,6 +1,6 @@
 var http = require('http');
 var server = http.createServer();
-var	url	=	require('url');	
+var url = require('url');	
 
 
 var planeten =  [
@@ -22,7 +22,7 @@ server.on('request', function(req, res)
     
           var pfad=url.parse(req.url).pathname;	
         
-            if(pfad=="/planeten"){
+          if(pfad=="/planeten"){
     
           res.writeHead(200, "OK", {'Content-Type': 'text/html'});
           res.write("<html><table><tr><td> | Name</td><td> | Abstand</td><td> | Durchmesser</td></tr>");
@@ -36,8 +36,9 @@ server.on('request', function(req, res)
           });
           
           res.write("</table></html>");
-            }else{
-            res.write('Planeten gibts unter /planeten');
+          }
+          else{
+          res.write('Planeten gibts unter /planeten');
         
             }
           res.end();

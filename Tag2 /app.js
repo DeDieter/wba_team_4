@@ -1,7 +1,19 @@
 var http = require('http');
+var querystring = require('querystring');
+var url = require('url');
 var express = require('express');
+var app = express();
 
-var planeten = [
+
+app.configure(function () {
+
+    app.use(express.static( __dirname + '/public'));
+    app.use(express.json());
+    app.use(express.urlencoded());
+    
+});
+
+        var planet = [
               {name: "Merkur", abstand: "58000000", durchmesser: "4840"},
               {name: "Venus", abstand: "108000000", durchmesser: "12400"},
               {name: "Erde", abstand: "150000000", durchmesser: "12742"},
@@ -12,45 +24,41 @@ var planeten = [
               {name: "Neptun", abstand: "4500000000", durchmesser: "44600"},
               {name: "Pluto", abstand: "5900000000", durchmesser: "5800"}
               ];
+        
 
-var app = express();
-
-app.use(express.static((__dirname + '/public')));
-
-app.use(express.json());
-
-app.use(express.urlencoded());
-
-
-app.set('port', 3000);
-
-app.get('/planeten', function(req, res) {
+function anzeige(req, res)
+{
     
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    res.write("<html><table border = '1'><tr><td>Name</td><td>Abstand</td><td>Durchmesser</td></tr>");
-    res.write("<tr><td></td><td></td><td></td></tr>");
+console.log('HTTP-Request gestartet')
+          console.log('HTTP-Methode: '+req.method);
+          
+ 
+                 res.writeHead(200, "OK", {'Content-Type': 'text/html'});
+                 res.write("<html><table border = '1'><tr><td>Name</td><td>Abstand</td><td>Durchmesser</td></tr>");
+                 res.write("<tr></tr>");
                  
-                 planeten.forEach(function(planeten)
+                 planet.forEach(function(planet)
                                 {
-                                res.write("<tr><td>"+ planeten.name +"</td>");
-                                res.write("<td>"+ planeten.abstand +"</td>");
-                                res.write("<td>"+ planeten.durchmesser +"</td></tr>");
+                                res.write("<tr><td>"+ planet.name +"</td>");
+                                res.write("<td>"+ planet.abstand +"</td>");
+                                res.write("<td>"+ planet.durchmesser +"</td></tr>");
                                 });
                  res.write("</table>");
-    res.end();
+                 res.end();
+    
+}
+
+app.get('/planeten', function (req, res){
+
+    anzeige(req,res);
+    
 });
 
-app.post('/planeten', function(req, res) {
-    
-    console.log(req.body);
-    
-    planeten.push(req.body);
-    
-    res.writeHead(200);
-    
-    res.end();
+app.post('/planeten', function (req, res){
+    console.log(req.body.name + " wurde hinzugefuegt!");
+	planet.push(req.body);
+    anzeige(req,res);
+               
 });
 
-app.listen(app.get('port'), function(){
-	console.log('Express server listening on port ' + app.get('port'));
-});
+app.listen(3000);

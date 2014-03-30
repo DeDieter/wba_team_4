@@ -1,54 +1,53 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>Aufgabe 2.1</title>
-    
-    <script src='http://code.jquery.com/jquery-1.11.0.min.js'></script>
-  </head>
-  <body>
-    
-    <form name='planeten' id='planeten' action='/planeten' method='POST'>
-	    Planet: <input type='text' name='name' id='name'/><br />
-	    Abstand zur Sonne: <input type='text' name='abstand' id='abstand'/><br />
-	  	Durchmesser: <input type='text' name='durchmesser' id='durchmesser'/><br />
-	  	<input type='submit' name='submit' value='senden' />
-		</form>
 
-   
-    <a href="/planeten">Tabelle</a>
-
-   
-    <script type='text/javascript'>
-      
-      $(document).ready(function() {
+    <head>
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+     <script type="text/javascript">
+         
+         
+         
+         $(document).ready(function()
+{
+   //Beim "Senden" soll folgendes passieren ...
+    $("#ph").submit(function() {
+ 
         
-        $('#planeten').submit(function(e) {
+	         event.preventDefault();
+       var data = 
+			{ 	
+				name: $('#name').val() ,
+			 	abstand: $('#abstand').val() ,
+			 	durchmesser: $('#durchmesser').val() 
+			 };
+			 //AJAX - Methode für das POST
+	        $.ajax({
+	          	type: 'POST',
+	          	url: '/planeten',
+	          	data: JSON.stringify(data),	//Datentyp
+	          	contentType: 'application/json'
+	          }).done(function(){	//wenn hinzugefuegt wurde
+	          	alert(data.name+' wurde hinzugefügt!');	
+	          	 $('#ph')[0].reset();	//Formular zurücksetzen
+	          }).fail(function(event){	//Fehlermeldung
+	          	alert(data.name+' konnte nicht hinzugefuegt werden!('+JSON.stringify(event)+')');
+	          });
+ 
+    });
+});
          
-          var formURL = $(this).attr('action');
-          
-          var data = {
-            name: $('#name').val(),
-            abstand: $('#abstand').val(),
-            durchmesser: $('#durchmesser').val()
-          };
-          
-          $.ajax({
-            
-            url: formURL,           
-            type: 'POST',            
-            data: JSON.stringify(data),
-            contentType: 'application/json'
-         
-          }).done(function() {
-            alert(data.name + ' hinzugefügt.');
-            $('#planeten')[0].reset();
-          
-          }).fail(function(e) {
-            alert(data.name + ' nicht hinzugefügt. (' + JSON.stringify(e) + ')');
-          });
-         
-          event.preventDefault();
-        });
-      });
-    </script>
-  </body>
+</script>
+        
+    </head>
+    <body>
+
+        <form id='ph' action='/planeten' method='POST'>
+                 <label>Planet</label><input type='text' id = 'name' name='name' value=''/></br>
+                 <label>Abstand zur Sonne</label><input type='text' id = 'abstand' name='abstand' value=''/></br>
+                 <label>Durchmesser</label><input type='text' id='durchmesser' name='durchmesser' value=''/></br>
+                 <input type='submit' value='Senden' />
+                 </form>
+        
+
+    </body>
 </html>

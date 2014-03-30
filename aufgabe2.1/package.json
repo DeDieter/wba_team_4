@@ -1,0 +1,14 @@
+{
+  "name": "aufgabe2.1",
+  "version": "0.1.0",
+  "description": "Aufgabe 2.1",
+  "main":"app.js",
+  "script": {
+  "test": "echo\"Error: no test specified! Configure in package.json\" && exit 1"},
+ 
+ "author":  "Gruppe 4",
+ "readmeFilename": "README.md",
+  "dependencies": {
+    "express": "3.x"
+  }
+}

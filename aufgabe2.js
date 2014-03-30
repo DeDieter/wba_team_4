@@ -25,6 +25,9 @@ server.on('request', function(req, res)
           if(pfad=="/planeten"){
     
           res.writeHead(200, "OK", {'Content-Type': 'text/html'});
+    
+    
+    
           res.write("<html><table><tr><td> | Name</td><td> | Abstand</td><td> | Durchmesser</td></tr>");
           res.write("<tr><td>------------</td><td>----------------</td><td>-------------</td></tr>");
           

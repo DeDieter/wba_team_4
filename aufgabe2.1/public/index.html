@@ -1,0 +1,54 @@
+<html>
+  <head>
+    <title>Aufgabe 2.1</title>
+    
+    <script src='http://code.jquery.com/jquery-1.11.0.min.js'></script>
+  </head>
+  <body>
+    
+    <form name='planeten' id='planeten' action='/planeten' method='POST'>
+	    Planet: <input type='text' name='name' id='name'/><br />
+	    Abstand zur Sonne: <input type='text' name='abstand' id='abstand'/><br />
+	  	Durchmesser: <input type='text' name='durchmesser' id='durchmesser'/><br />
+	  	<input type='submit' name='submit' value='senden' />
+		</form>
+
+   
+    <a href="/planeten">Tabelle</a>
+
+   
+    <script type='text/javascript'>
+      
+      $(document).ready(function() {
+        
+        $('#planeten').submit(function(e) {
+         
+          var formURL = $(this).attr('action');
+          
+          var data = {
+            name: $('#name').val(),
+            abstand: $('#abstand').val(),
+            durchmesser: $('#durchmesser').val()
+          };
+          
+          $.ajax({
+            
+            url: formURL,           
+            type: 'POST',            
+            data: JSON.stringify(data),
+            contentType: 'application/json'
+         
+          }).done(function() {
+            alert(data.name + ' hinzugefügt.');
+            $('#planeten')[0].reset();
+          
+          }).fail(function(e) {
+            alert(data.name + ' nicht hinzugefügt. (' + JSON.stringify(e) + ')');
+          });
+         
+          event.preventDefault();
+        });
+      });
+    </script>
+  </body>
+</html>

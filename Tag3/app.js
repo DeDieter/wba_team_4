@@ -3,7 +3,17 @@ var querystring = require('querystring');
 var url = require('url');
 var express = require('express');
 var app = express();
+var faye = require('faye');
+var server = http.createServer(app);
+var mongoDB = require('mongoskin');
 
+var bayeux = new faye.NodeAdapter({
+    mount: '/faye',
+    timeout: 45
+});
+
+bayeux.attach(server);
+var pubClient = bayeux.getClient();
 
 app.configure(function () {
 
@@ -13,17 +23,11 @@ app.configure(function () {
     
 });
 
-//Datenbankverbindung
-var mongoDB = require('mongoskin');
-
-
-
 var db = mongoDB.db('mongodb://localhost/planeten?auto_reconnect=true', {
     safe: true
 });
-//db.dropDatabase();
-db.bind("planeten");
 
+db.bind("planeten");
 var daba = db.planeten;
 
 /*
@@ -45,49 +49,8 @@ daba.insert([
 
 */
 
-function anzeige(req, res)
-{
-    
-
-console.log('HTTP-Request gestartet')
-          console.log('HTTP-Methode: '+req.method);
-          
- 
-    daba.findItems(function(err, planeten){
-        
-        if(err)
-        {
-            console.log("Fehler!");
-        }
-            else {
-                 res.writeHead(200, "OK", {'Content-Type': 'text/html'});
-                 res.write("<html><table border = '1'><tr><td>Name</td><td>Abstand</td><td>Durchmesser</td></tr>");
-                 res.write("<tr></tr>");
-                planeten.forEach(function(planet){
-                
-                    res.write("<tr><td>"+ planet.name +"</td>");
-                                res.write("<td>"+ planet.abstand +"</td>");
-                                res.write("<td>"+ planet.durchmesser +"</td></tr>");
-                                });
-                 res.write("</table>");
-                 res.end(JSON.stringify(planeten));
-                
-                     
-        }
-    });
-    
-}
-
 app.get('/get', function (req, res, next){
     
-    //anzeige(req,res);
-    
-          //console.log('aha1');
-    /*res.send("JO");
-          console.log('aha1');
-    
-    
-      */
     daba.findItems(function(err, result) {
         if(err)
             next(err);
@@ -96,31 +59,26 @@ app.get('/get', function (req, res, next){
                 'Content-Type': 'application/json'
             });
             res.end(JSON.stringify(result));
-            
-        }
+        } 
     });
-    
-    
-    
-    
 });
 
-
-
 app.post('/planeten', function (req, res){
-    console.log(req.body.name + " wurde hinzugefuegt!");
-	//planet.push(req.body);
     
-    daba.insert(
-        {name: req.body.name,
-         abstand: req.body.abstand,
-         durchmesser: req.body.durchmesser
-        }, function(err, planeten){
-                    console.log("DB-Fehler!");
-              });
-
-    anzeige(req,res);
-               
+    daba.insert(req.body, function(error, planeten) {
+		if(error) next(error);
+		else console.log(req.body.name + ' gespeichert!');
+	});
+    
+	var publication = pubClient.publish('/planeten', req.body);
+	
+	publication.then(function() {
+		res.writeHead(200, 'OK');
+		console.log(req.body.name + ' veröffentlicht auf "/planeten"!');
+		res.end();
+	}, function(error) {
+		next(error);
+	});
 });
 
 app.listen(3000);

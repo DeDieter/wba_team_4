@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WBA2 - Week 2</title>
+    
+    <script type='text/javascript' src='http://code.jquery.com/jquery-1.11.0.min.js'></script>
+ 
+    <script type='text/javascript' src='/faye/client.js'></script>
+  </head>
+  <body>
+    <table border='1' id='news'>
+	     <tr>
+         <th>Name</th>
+         <th>Durchmesser in km</th>
+         <th>Abstand zur Sonne in km</th>
+       </tr>
+    </table>
+
+    <form name='planeten' id='planeten' action='/planeten' method='POST'>
+	    Planeten: <input type='text' name='name' id='name'/><br />
+	    Durchmesser: <input type='text' name='durchmesser' id='durchmesser'/><br />
+	  	Abstand: <input type='text' name='abstand' id='abstand'/><br />
+	  	<input type='submit' name='submit' value='hinzufügen' />
+		</form>
+
+    
+    <script type='text/javascript'>
+      
+      $(document).ready(function() {
+      
+        var client = new Faye.Client('/faye');
+
+        
+        var subscription = client.subscribe('/planeten', function(message) {
+         
+          addTableRow(message);
+        });
+
+      
+        $('#planeten').submit(function(event) {
+          var formURL = $(this).attr('action')
+          var data = {
+            name: $('#name').val(),
+            durchmesser: $('#durchmesser').val(),
+            abstand: $('#abstand').val()
+          };
+
+          
+          var ajaxPost = $.ajax({      
+            url: formURL,
+            type: 'POST',
+            data: JSON.stringify(data),
+            contentType: 'application/json'
+          });
+       
+          ajaxPost.done(function() {
+            alert(data.name + ' hinzugefügt.');
+            $('#planeten')[0].reset();
+          });
+         
+          ajaxPost.fail(function(e) {
+            alert(data.name + ' nicht hinzugefügt. (' + JSON.stringify(e) + ')');
+          });
+          
+          event.preventDefault();
+        });
+
+        
+        var request = $.ajax({
+          url: '/planeten',
+          type: 'GET',
+          contentType: 'application/json'
+        });
+       
+        request.done(function(data) {
+          data.forEach(function(planeten) {
+            addTableRow(planeten);
+          });
+        });
+        request.fail(function(e) {
+          alert('Etwas lief falsch!(Error: ' + JSON.stringify(e) + ')');
+        });
+    
+        var addTableRow = function(planeten) {
+          $('#news').append('<tr><td>' + planeten.name + '</td><td>' + planeten.durchmesser + '</td><td>' + planeten.abstand + '</td></tr>');
+        };
+      });
+    </script>
+  </body>
+</html>

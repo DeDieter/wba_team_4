@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script type="text/javascript" src="/faye/client.js"></script>
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            event.preventDefault();
+
+            var request = $.ajax({
+                 type: 'GET',
+                 url: '/sget',
+                 contentType: 'application/json'
+            })
+            request.done(function(data) {
+                 data.forEach(function(spieler) {
+                     addTableRow(spieler);
+                     console.log(spieler);
+                 });
+            })
+            request.fail(function(error) {
+                 alert('Es ist ein Fehler aufgetreten.');
+            });
+        });
+
+        var client = new Faye.Client('/faye');
+        var subscription = client.subscribe('/spieler', function(msg) {
+          addTableRow(msg);
+        });
+
+        function addTableRow(spieler){
+         $('table#tabelle tbody').first().append
+         ('<tr><td>'+spieler.sname+'</td><td>'+spieler.tname +'</td></tr>');
+        }; 
+    </script>
+    <title>Tabellausgabe</title>
+</head>
+    <body>
+        <table id="tabelle" border="1">
+            <thead>
+                <th>Name</th><th>Team</th>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </body>
+</html>

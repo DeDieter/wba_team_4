@@ -28,6 +28,8 @@ var db = mongoDB.db('mongodb://localhost/Torganizer?auto_reconnect=true', {
 });
 
 
+
+
 /*
 
 //Datenbank mit Inhalt füllen
@@ -52,6 +54,7 @@ app.get('/tget', function (req, res, next){
     
     db.bind("team");
     var daba = db.team;
+    
     
     daba.findItems(function(err, result) {
         if(err)
@@ -126,5 +129,34 @@ app.post('/spieler', function (req, res){
 		next(error);
 	});
 });
+
+app.get('/eteamg', function (req, res, next){
+    
+    
+    db.bind("spieler");
+    var daba = db.spieler;
+    
+    
+    daba.find({tname:su}).toArray(function(err, result) {
+    if(err)
+            next(err);
+        else {
+            res.writeHead(200, {
+                'Content-Type': 'application/json'
+            });
+            res.end(JSON.stringify(result));
+        } 
+    });
+    
+    
+});
+var su;
+app.post('/eteamp', function (req, res){
+    
+    
+    su = req.body.name;
+});
+
+
 
 server.listen(3000);

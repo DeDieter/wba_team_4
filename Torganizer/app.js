@@ -107,7 +107,45 @@ app.post('/team', function (req, res){
 		next(error);
 	});
 });
+app.post('/ergebnis', function (req, res){
+    
+    
+    db.bind("ergebnis");
+    var daba = db.ergebnis;
+    
+    daba.insert(req.body, function(error, ergebnis) {
+		if(error) next(error);
+		else console.log(req.body.sname + ' gespeichert!');
+	});
+    
+	var publication = pubClient.publish('/ergebnis', req.body);
+	
+	publication.then(function() {
+		res.writeHead(200, 'OK');
+		console.log(req.body.sname + ' veröffentlicht auf "/ergebnis"!');
+		res.end();
+	}, function(error) {
+		next(error);
+	});
+});
 
+app.get('/liveget', function (req, res, next){
+    
+    
+    db.bind("ergebnis");
+    var daba = db.ergebnis;
+    
+    daba.findItems(function(err, result) {
+        if(err)
+            next(err);
+        else {
+            res.writeHead(200, {
+                'Content-Type': 'application/json'
+            });
+            res.end(JSON.stringify(result));
+        } 
+    });
+});
 app.post('/spieler', function (req, res){
     
     

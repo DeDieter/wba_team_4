@@ -68,6 +68,25 @@ app.get('/tget', function (req, res, next){
     });
 });
 
+app.get('/tabelleget', function (req, res, next){
+    
+    
+    db.bind("team");
+    var daba = db.team;
+    
+    
+    daba.findItems(function(err, result) {
+        if(err)
+            next(err);
+        else {
+            res.writeHead(200, {
+                'Content-Type': 'application/json'
+            });
+            res.end(JSON.stringify(result));
+        } 
+    });
+});
+
 app.get('/sget', function (req, res, next){
     
     

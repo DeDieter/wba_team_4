@@ -28,13 +28,16 @@ var db = mongoDB.db('mongodb://localhost/Torganizer?auto_reconnect=true', {
 });
 
 
+
+
+
 app.get('/tget', function (req, res, next){
     
     
     db.bind("team");
     var daba = db.team;
     
-    
+    //mongoskin sort
     daba.findItems(function(err, result) {
         if(err)
             next(err);
@@ -105,6 +108,7 @@ app.post('/team', function (req, res){
 		next(error);
 	});
 });
+
 app.post('/ergebnis', function (req, res){
     
     
@@ -164,6 +168,57 @@ app.post('/spieler', function (req, res){
 	}, function(error) {
 		next(error);
 	});
+});
+
+app.post('/spunkte', function (req, res){
+    db.bind("spieler");
+    var daba = db.spieler;
+    
+    
+    daba.find({sname:req.body.name}).toArray(function(err, result) {
+    if(err)
+            next(err);
+        else {
+            res.writeHead(200, {
+                'Content-Type': 'application/json'
+            });
+            
+            res.end(JSON.stringify(result));
+            var p = parseInt(req.body.punkte, 10) + parseInt(result[0].punkte, 10);
+             daba.update({sname:req.body.name}, {$set:{punkte:p}}, function(err, result) {
+                if (!err) console.log('Punkte hinzugefuegt!');
+                });
+    
+                var publication = pubClient.publish('/punkte', req.body);
+
+                publication.then(function() {
+                    res.writeHead(200, 'OK');
+                    console.log(req.body.name + ' veröffentlicht auf "/punkte"!');
+                    res.end();
+                }, function(error) {
+                    next(error);
+                });
+            //Update hier rein!!!!!
+            
+        } 
+    });
+    
+    
+    /*
+    daba.update({sname:req.body.name}, {$set:{punkte:req.body.punkte}}, function(err, result) {
+    if (!err) console.log('Punkte hinzugefuegt!');
+    });
+    
+	var publication = pubClient.publish('/punkte', req.body);
+	
+	publication.then(function() {
+		res.writeHead(200, 'OK');
+		console.log(req.body.name + ' veröffentlicht auf "/punkte"!');
+		res.end();
+	}, function(error) {
+		next(error);
+	});*/
+    
 });
 
 app.get('/eteamg', function (req, res, next){

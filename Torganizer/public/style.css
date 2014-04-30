@@ -1,8 +1,8 @@
-a.menu { display:block; width:70px; border:6px groove #99d; margin-top:4px; padding:6px; font-family:"Trebuchet MS", Helvetica, sans-serif; font-size:130%; font-weight:bold; }
+a.menu { display:block; width:70px; border:6px groove #99d; margin-top:3px; padding:6px; font-family:"Trebuchet MS", Helvetica, sans-serif; font color:white; font-size:130%; font-weight:bold; }
 
-a.menu:link    { color:#44a; background-color:#fff; text-decoration:none; }
-a.menu:visited { color:#44a; background-color:#fff; text-decoration:none; }
-a.menu:hover   { color:#44a; background-color:#ff9; text-decoration:none; }
-a.menu:active  { color:#44a; background-color:#ff9; text-decoration:none; }
+a.menu:link    { color:#44a; background-color:#3b5998; text-decoration:none; }
+a.menu:visited { color:#44a; background-color:#3b5998; text-decoration:none; }
+a.menu:hover   { color:#44a; background-color:#483d8b; text-decoration:none; }
+a.menu:active  { color:#44a; background-color:#483d8b; text-decoration:none; }
 
-div.menu { color:#000; background-color:white; width:200px; text-align:center; padding:20px; }
+div.menu { color:black; background-color:white; width:200px; text-align:center; padding:20px; }

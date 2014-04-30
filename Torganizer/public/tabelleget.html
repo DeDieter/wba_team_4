@@ -42,15 +42,16 @@
 
         function addTableRow(team){
             dat.push(team);
-         for(var x = 0; x<4; x++){
+            dat.forEach(function(da){
+         if(team.name != da.name){
             $('table#tabelle tbody').first().append
-         ('<tr><td>'+team.name+'</td><td>'+dat[i].name +'</td></tr>');
-            i = i + 1;
-         
-         };
+         ('<tr><td>'+team.name+'</td><td>'+da.name +'</td></tr>');
+            
+         }
+            });  
         }; 
     </script>
-    <title>Tabellausgabe</title>
+    <title>Begegnungen</title>
 </head>
     <body>
         <table id="tabelle" border="1">

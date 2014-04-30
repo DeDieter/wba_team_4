@@ -28,27 +28,6 @@ var db = mongoDB.db('mongodb://localhost/Torganizer?auto_reconnect=true', {
 });
 
 
-
-
-/*
-
-//Datenbank mit Inhalt füllen
-daba.insert([
-              {name: "Merkur", abstand: "58000000", durchmesser: "4840"},
-              {name: "Venus", abstand: "108000000", durchmesser: "12400"},
-              {name: "Erde", abstand: "150000000", durchmesser: "12742"},
-              {name: "Mars", abstand: "280000000", durchmesser: "6800"},
-              {name: "Jupiter", abstand: "775000000", durchmesser: "142800"},
-              {name: "Saturn", abstand: "1440000000", durchmesser: "120800"},
-              {name: "Uranus", abstand: "2870000000", durchmesser: "47600"},
-              {name: "Neptun", abstand: "4500000000", durchmesser: "44600"},
-              {name: "Pluto", abstand: "5900000000", durchmesser: "5800"}
-              ], function(err, planeten){
-                    console.log("DB-Fehler!");
-              });
-
-*/
-
 app.get('/tget', function (req, res, next){
     
     

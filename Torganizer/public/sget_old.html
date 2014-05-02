@@ -33,7 +33,7 @@
 
         function addTableRow(spieler){
          $('table#tabelle tbody').first().append
-         ('<tr><td>'+spieler.sname+'</td><td>'+spieler.tname +'</td></tr>');
+         ('<tr><td>'+spieler.sname+'</td><td>'+spieler.tname +'</td><td>'+spieler.punkte +'</td></tr>');
         }; 
     </script>
     <title>Tabellausgabe</title>
@@ -41,7 +41,7 @@
     <body>
         <table id="tabelle" border="1">
             <thead>
-                <th>Name</th><th>Team</th>
+                <th>Name</th><th>Team</th><th>Punkte</th>
             </thead>
             <tbody></tbody>
         </table>

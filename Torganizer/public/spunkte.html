@@ -30,6 +30,10 @@
             });
             
             
+           $('#teamSelect').html('<option value="">Bitte Team auswählen</option>');
+            
+           $('#spielerSelect').html('<option value="">Erst Team auswählen</option>');
+            
             var request = $.ajax({
                  type: 'GET',
                  url: '/tget',

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+           //Beim "Senden" soll folgendes passieren ...
+            $("#ph").submit(function() {
+
+               event.preventDefault();
+               var data = 
+                    { 	
+                        name: $('#spielerSelect').val() ,
+                        punkte: $('#punkte').val() 
+                     };
+                     //AJAX - Methode für das POST
+                    $.ajax({
+                        type: 'POST',
+                        url: '/spunkte',
+                        data: JSON.stringify(data),	//Datentyp
+                        contentType: 'application/json'
+                      }).done(function(){	//wenn hinzugefuegt wurde
+                        alert(data.name+' wurde hinzugefügt!');	
+                         $('#ph')[0].reset();	//Formular zurücksetzen
+                      }).fail(function(event){	//Fehlermeldung
+                        alert(data.name+' konnte nicht hinzugefuegt werden!('+JSON.stringify(event)+')');
+                      });
+            });
+            
+            
+           $('#teamSelect').html('<option value="">Bitte Team auswählen</option>');
+            
+           $('#spielerSelect').html('<option value="">Erst Team auswählen</option>');
+            
+            var request = $.ajax({
+                 type: 'GET',
+                 url: '/tget',
+                 contentType: 'application/json'
+            })
+            request.done(function(data) {
+                 data.forEach(function(team) {
+                     $('#teamSelect').append('<option value="' + team.name + '">' + team.name + '</option>'); 
+                     console.log(team);
+                 });
+            })
+            request.fail(function(error) {
+                 alert('Es ist ein Fehler aufgetreten.');
+            });
+        
+        
+        $("#teamSelect").change(function() {
+
+           
+                $("#tabelle tr").remove();
+            
+            $('table#tabelle thead').first().append
+                        ('<tr><th>Name</th><th>Team</th><th>Punkte</th></tr>');
+            t = $(this).val();
+            
+            var request = $.ajax({
+                 type: 'GET',
+                 url: '/sget',
+                 contentType: 'application/json'
+            })
+            request.done(function(data) {
+                 data.forEach(function(spieler) {
+                     
+                     if(t==spieler.tname)
+                     {
+                         $('table#tabelle tbody').first().append
+                        ('<tr><td>'+spieler.sname+'</td><td>'+spieler.tname +'</td><td>'+spieler.punkte +'</td></tr>');
+                         console.log(spieler);
+                     }
+                 });
+            })
+            request.fail(function(error) {
+                 alert('Es ist ein Fehler aufgetreten.');
+            });
+        });          
+          });  
+    </script>
+</head>
+    <body>
+       
+            <select id="teamSelect" name="team">
+            </select>
+           
+          <br><br>
+    <table id="tabelle" border="1">
+            <thead></thead><tbody></tbody>
+        </table>
+    </body>
+</html>

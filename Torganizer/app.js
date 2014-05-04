@@ -5,7 +5,8 @@ var express = require('express');
 var app = express();
 var faye = require('faye');
 var server = http.createServer(app);
-var mongoDB = require('mongoskin');
+var mongoDB = require('mongoskin'),
+fs = require('fs');
 
 var bayeux = new faye.NodeAdapter({
     mount: '/faye',
@@ -27,8 +28,25 @@ var db = mongoDB.db('mongodb://localhost/Torganizer?auto_reconnect=true', {
     safe: true
 });
 
-
-
+//
+//var doesNotModifyBody = function(request, response, next) {
+//  request.params = {
+//    a: "b"
+//  };
+//  // calls next because it hasn't modified the header
+//  next();
+//};
+//
+//// middleware that modify the response body
+//var doesModifyBody = function(request, response, next) {
+//  response.setHeader("Content-Type", "text/html");
+//  response.write("<p>Hello World</p>");
+//  response.end();
+//  // doesn't call next()
+//};
+//
+//app.use(doesNotModifyBody);
+//app.use(doesModifyBody);
 
 
 app.get('/tget', function (req, res, next){
@@ -134,8 +152,8 @@ app.post('/ergebnis', function (req, res){
 app.get('/liveget', function (req, res, next){
     
     
-    db.bind("ergebnis");
-    var daba = db.ergebnis;
+    db.bind("liveticker");
+    var daba = db.liveticker;
     
     daba.findItems(function(err, result) {
         if(err)
@@ -148,7 +166,8 @@ app.get('/liveget', function (req, res, next){
         } 
     });
 });
-app.post('/spieler', function (req, res){
+
+app.post('/spieler', function (req, res, next){
     
     
     db.bind("spieler");
@@ -159,16 +178,18 @@ app.post('/spieler', function (req, res){
 		else console.log(req.body.sname + ' gespeichert!');
 	});
     
+    
 	var publication = pubClient.publish('/spieler', req.body);
 	
 	publication.then(function() {
 		res.writeHead(200, 'OK');
 		console.log(req.body.sname + ' veröffentlicht auf "/spieler"!');
-		res.end();
+        res.end();
 	}, function(error) {
 		next(error);
 	});
 });
+
 
 app.post('/spunkte', function (req, res){
     db.bind("spieler");
@@ -241,6 +262,41 @@ app.get('/eteamg', function (req, res, next){
     
     
 });
+
+app.post('/spielStart', function (req, res, next){
+    
+    
+    
+    db.bind("spiel");
+    var daba = db.spiel;
+    
+    daba.insert(req.body, function(error, spiel) {
+		if(error) next(error);
+		else console.log(req.body.ereignis + ' - gespeichert!');
+	}); 
+    
+    db.bind("liveticker");
+    var daba = db.liveticker;
+    
+    var ticker = 'Spielbeginn: ' + req.body.teamA + ' gegen ' + req.body.teamB + '!';
+    
+    daba.insert({tick: ticker}, function(error, liveticker) {
+		if(error) next(error);
+		else console.log(ticker + ' - gespeichert!');
+	});
+    
+	var publication = pubClient.publish('/liveticker', ticker);
+	
+	publication.then(function() {
+		res.writeHead(200, 'OK');
+		console.log(ticker + ' - veröffentlicht auf "/liveticker"!');
+		res.end();
+	}, function(error) {
+		next(error);
+	});
+    
+});
+
 var su;
 app.post('/eteamp', function (req, res){
     

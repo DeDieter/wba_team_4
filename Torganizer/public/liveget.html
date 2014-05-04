@@ -16,9 +16,9 @@
                  contentType: 'application/json'
             })
             request.done(function(data) {
-                 data.forEach(function(ergebnis) {
-                     addTableRow(ergebnis);
-                     console.log(ergebnis);
+                 data.forEach(function(ticker) {
+                     addTableRow(ticker);
+                     console.log(ticker);
                  });
             })
             request.fail(function(error) {
@@ -27,13 +27,13 @@
         });
 
         var client = new Faye.Client('/faye');
-        var subscription = client.subscribe('/ergebnis', function(msg) {
+        var subscription = client.subscribe('/liveticker', function(msg) {
           addTableRow(msg);
         });
 
-        function addTableRow(ergebnis){
+        function addTableRow(ticker){
          $('table#tabelle tbody').first().append
-         ('<tr><td>'+ergebnis.name+'</td></tr>');
+         ('<tr><td>'+ticker.tick+'</td></tr>');
         }; 
     </script>
     <title>Tabellausgabe</title>

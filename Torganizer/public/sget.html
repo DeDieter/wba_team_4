@@ -34,12 +34,17 @@
             
            $('#spielerSelect').html('<option value="">Erst Team auswählen</option>');
             
+           
             var request = $.ajax({
                  type: 'GET',
                  url: '/tget',
                  contentType: 'application/json'
             })
+            
             request.done(function(data) {
+                
+                
+                
                  data.forEach(function(team) {
                      $('#teamSelect').append('<option value="' + team.name + '">' + team.name + '</option>'); 
                      console.log(team);
@@ -58,13 +63,25 @@
             $('table#tabelle thead').first().append
                         ('<tr><th>Name</th><th>Team</th><th>Punkte</th></tr>');
             t = $(this).val();
-            
+             
             var request = $.ajax({
                  type: 'GET',
                  url: '/sget',
                  contentType: 'application/json'
             })
             request.done(function(data) {
+            
+                	var temp;
+		for(var i=1; i<data.length; i++) {
+			for(var j=0; j<data.length-i; j++) {
+				if(data[j].punkte<data[j+1].punkte) {
+					temp=data[j];
+					data[j]=data[j+1];
+					data[j+1]=temp;
+				}
+				
+			}
+		}
                  data.forEach(function(spieler) {
                      
                      if(t==spieler.tname)

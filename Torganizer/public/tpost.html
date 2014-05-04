@@ -12,7 +12,8 @@
                event.preventDefault();
                var data = 
                     { 	
-                        name: $('#name').val() 
+                        name: $('#name').val() ,
+                        punkte: 0
                      };
                      //AJAX - Methode für das POST
                     $.ajax({
@@ -33,7 +34,6 @@
     <body>
         <form id='ph' action='/team' method='POST'>
                  <label>Name</label><input type='text' id = 'name' name='name' value=''/></br>
-                 <input type="hidden" name="object" value="team">
                  <br><input type='submit' value='Senden' />
                  </form>
         <br><a href="/tget.html">Tabellenausgabe</a>

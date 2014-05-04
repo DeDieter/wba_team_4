@@ -16,6 +16,19 @@
                  contentType: 'application/json'
             })
             request.done(function(data) {
+                
+                var temp;
+		for(var i=1; i<data.length; i++) {
+			for(var j=0; j<data.length-i; j++) {
+				if(data[j].punkte<data[j+1].punkte) {
+					temp=data[j];
+					data[j]=data[j+1];
+					data[j+1]=temp;
+				}
+				
+			}
+		}
+                
                  data.forEach(function(team) {
                      addTableRow(team);
                      console.log(team);
@@ -33,7 +46,7 @@
 
         function addTableRow(team){
          $('table#tabelle tbody').first().append
-         ('<tr><td>'+team.name+'</td></tr>');
+         ('<tr><td>'+team.name+'</td><td>'+team.punkte+'</td></tr>');
         }; 
     </script>
     <title>Tabellausgabe</title>
@@ -41,7 +54,7 @@
     <body>
         <table id="tabelle" border="1">
             <thead>
-                <th>Name</th>
+                <th>Name</th><th>Punkte</th>
             </thead>
             <tbody></tbody>
         </table>

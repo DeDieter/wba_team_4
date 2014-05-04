@@ -13,7 +13,8 @@
                var data = 
                     { 	
                         tname: $('#teamSelect').val() ,
-                        sname: $('#sname').val() 
+                        sname: $('#sname').val() ,
+                        punkte: 0
                      };
                      //AJAX - Methode für das POST
                     $.ajax({
@@ -23,7 +24,9 @@
                         contentType: 'application/json'
                       }).done(function(){	//wenn hinzugefuegt wurde
                         alert('"'+data.sname+'" wurde in der Gruppe "' + data.tname + '" hinzugefügt!');	
-                         $('#ph')[0].reset();	//Formular zurücksetzen
+                         //$('#ph')[0].reset();	//Formular zurücksetzen
+                        window.location.replace('sget_old.html');
+
                       }).fail(function(event){	//Fehlermeldung
                         alert(data.sname+' konnte nicht hinzugefuegt werden!('+JSON.stringify(event)+')');
                       });
@@ -57,7 +60,7 @@
     </script>
 </head>
     <body> 
-        <form id='ph' action='/spieler' method='POST'>
+        <form id='ph' action='spieler' method='POST'>
             <label>Team: </label><select id="teamSelect" name="team">
             </select>
             <br>

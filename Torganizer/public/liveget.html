@@ -28,7 +28,8 @@
 
         var client = new Faye.Client('/faye');
         var subscription = client.subscribe('/liveticker', function(msg) {
-          addTableRow(msg);
+         $('table#tabelle tbody').first().append
+         ('<tr><td>'+msg+'</td></tr>');
         });
 
         function addTableRow(ticker){

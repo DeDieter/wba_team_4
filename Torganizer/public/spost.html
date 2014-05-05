@@ -25,7 +25,7 @@
                       }).done(function(){	//wenn hinzugefuegt wurde
                         alert('"'+data.sname+'" wurde in der Gruppe "' + data.tname + '" hinzugefügt!');	
                          //$('#ph')[0].reset();	//Formular zurücksetzen
-                        window.location.replace('sget_old.html');
+                        window.location.replace('sget.html');
 
                       }).fail(function(event){	//Fehlermeldung
                         alert(data.sname+' konnte nicht hinzugefuegt werden!('+JSON.stringify(event)+')');

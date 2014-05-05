@@ -28,27 +28,6 @@ var db = mongoDB.db('mongodb://localhost/Torganizer?auto_reconnect=true', {
     safe: true
 });
 
-//
-//var doesNotModifyBody = function(request, response, next) {
-//  request.params = {
-//    a: "b"
-//  };
-//  // calls next because it hasn't modified the header
-//  next();
-//};
-//
-//// middleware that modify the response body
-//var doesModifyBody = function(request, response, next) {
-//  response.setHeader("Content-Type", "text/html");
-//  response.write("<p>Hello World</p>");
-//  response.end();
-//  // doesn't call next()
-//};
-//
-//app.use(doesNotModifyBody);
-//app.use(doesModifyBody);
-
-
 app.get('/tget', function (req, res, next){
     
     
@@ -175,7 +154,7 @@ app.post('/spieler', function (req, res, next){
     
     daba.insert(req.body, function(error, spieler) {
 		if(error) next(error);
-		else console.log(req.body.sname + ' gespeichert!');
+		else console.log(req.body.name + ' gespeichert!');
 	});
     
     
@@ -183,7 +162,7 @@ app.post('/spieler', function (req, res, next){
 	
 	publication.then(function() {
 		res.writeHead(200, 'OK');
-		console.log(req.body.sname + ' veröffentlicht auf "/spieler"!');
+		console.log(req.body.name + ' veröffentlicht auf "/spieler"!');
         res.end();
 	}, function(error) {
 		next(error);
@@ -198,9 +177,9 @@ app.post('/spunkte', function (req, res){
     db.bind("spieler");
     var daba = db.spieler;
     
-    var tick
+    var tick;
     
-    daba.find({sname:req.body.name}).toArray(function(err, result) {
+    daba.find({name:req.body.name}).toArray(function(err, result) {
     if(err)
             next(err);
         else {
@@ -210,7 +189,7 @@ app.post('/spunkte', function (req, res){
             
             res.end(JSON.stringify(result));
             var p = parseInt(req.body.punkte, 10) + parseInt(result[0].punkte, 10);
-             daba.update({sname:req.body.name}, {$set:{punkte:p}}, function(err, result) {
+             daba.update({name:req.body.name}, {$set:{punkte:p}}, function(err, result) {
                 if (!err){
                     console.log('Punkte hinzugefuegt!');
                     db.bind("liveticker");
@@ -235,42 +214,37 @@ app.post('/spunkte', function (req, res){
                             
                             console.log(ticker + ' - in liveticker hinzugefuegt');
                             
-                            //Punnkte in "spiel" hinzufuegen
+                            //Punkte beim Spieler hinzufuegen
                             db.bind("spieler");
                             var daba = db.spieler;
-                            
-                            daba.find({sname:req.body.name}).toArray(function(err, result) {
-                                var team = result[0].tname;
+                            //Tea
+                            daba.find({name:req.body.name}).toArray(function(err, result) {
+                                var team = result[0].team;
 
                                 db.bind("spiel");
                                 var daba = db.spiel;
                                     
-                                    var fuehrung;
                                     if(req.body.teamA == team)
                                     {
                                         teamA = teamA + parseInt(req.body.punkte, 10);
                                         daba.update({teamA:req.body.teamA, teamB:req.body.teamB }, {$set:{aPunkte:teamA}}, function(err, result)
                                         {
                                             if(error) next(error);
-                                            else{
-                                                    console.log('teamA p ' + teamA);
-                                            }
                                         });
                                     }
                                     else
                                     {
-                                            teamB = teamB + parseInt(req.body.punkte, 10);
+                                        teamB = teamB + parseInt(req.body.punkte, 10);
                                         daba.update({teamA:req.body.teamA, teamB:req.body.teamB }, {$set:{bPunkte:teamB}}, function(err, result)
                                         {
                                             if(error) next(error);
-                                            else{
-                                                    console.log('teamB p ' + teamB);
-                                            }
                                         });
                                     }
                              
-                                   ticker = req.body.teamA + '  -  '  + teamA + ' : ' + teamB + '  -  ' + req.body.teamB;
-                                
+                                    
+                                //publish Zwischenstand des Spiels
+                                ticker = req.body.teamA + '  -  '  + teamA + ' : ' + teamB + '  -  ' + req.body.teamB;
+                                       
                                     var publication = pubClient.publish('/liveticker', ticker);
 
                                     publication.then(function() {
@@ -297,7 +271,7 @@ app.post('/spunkte', function (req, res){
     });
     
     
-    /*
+    /*  SET!
     daba.update({sname:req.body.name}, {$set:{punkte:req.body.punkte}}, function(err, result) {
     if (!err) console.log('Punkte hinzugefuegt!');
     });
@@ -354,14 +328,12 @@ app.post('/spielStart', function (req, res, next){
     
     daba.insert({tick: ticker}, function(error, liveticker) {
 		if(error) next(error);
-		else console.log(ticker + ' - gespeichert!');
 	});
     
 	var publication = pubClient.publish('/liveticker', ticker);
 	
 	publication.then(function() {
 		res.writeHead(200, 'OK');
-		console.log(ticker + ' - veröffentlicht auf "/liveticker"!');
 		res.end();
 	}, function(error) {
 		next(error);

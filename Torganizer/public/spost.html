@@ -12,8 +12,8 @@
                event.preventDefault();
                var data = 
                     { 	
-                        tname: $('#teamSelect').val() ,
-                        sname: $('#sname').val() ,
+                        team: $('#teamSelect').val() ,
+                        name: $('#name').val() ,
                         punkte: 0
                      };
                      //AJAX - Methode für das POST
@@ -23,12 +23,12 @@
                         data: JSON.stringify(data),	//Datentyp
                         contentType: 'application/json'
                       }).done(function(){	//wenn hinzugefuegt wurde
-                        alert('"'+data.sname+'" wurde in der Gruppe "' + data.tname + '" hinzugefügt!');	
+                        alert('"'+data.name+'" wurde in der Gruppe "' + data.team + '" hinzugefügt!');	
                          //$('#ph')[0].reset();	//Formular zurücksetzen
                         window.location.replace('sget.html');
 
                       }).fail(function(event){	//Fehlermeldung
-                        alert(data.sname+' konnte nicht hinzugefuegt werden!('+JSON.stringify(event)+')');
+                        alert(data.name+' konnte nicht hinzugefuegt werden!('+JSON.stringify(event)+')');
                       });
             });
       
@@ -64,7 +64,7 @@
             <label>Team: </label><select id="teamSelect" name="team">
             </select>
             <br>
-                 <label>Name: </label><input type='text' id = 'sname' name='name' value=''/></br>
+                 <label>Name: </label><input type='text' id = 'name' value=''/></br>
                  <br><input type='submit' value='Senden' />
                  </form>
         <br><a href="/sget.html">Tabellenausgabe</a>

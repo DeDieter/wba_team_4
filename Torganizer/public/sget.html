@@ -85,10 +85,10 @@
 		}
                  data.forEach(function(spieler) {
                      
-                     if(t==spieler.tname)
+                     if(t==spieler.team)
                      {
                          $('table#tabelle tbody').first().append
-                        ('<tr><td>'+spieler.sname+'</td><td>'+spieler.tname +'</td><td>'+spieler.punkte +'</td></tr>');
+                        ('<tr><td>'+spieler.name+'</td><td>'+spieler.team +'</td><td>'+spieler.punkte +'</td></tr>');
                          console.log(spieler);
                      }
                  });

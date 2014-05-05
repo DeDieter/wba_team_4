@@ -133,7 +133,7 @@ app.post('/livepost', function (req, res){
     db.bind("liveticker");
     var daba = db.liveticker;
     
-    daba.insert(req.body, function(error, ergebnis) {
+    daba.insert(req.body, function(error, liveticker) {
 		if(error) next(error);
 		else console.log(req.body.tick + ' gespeichert!');
 	});

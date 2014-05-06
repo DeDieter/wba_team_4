@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script type="text/javascript">
+
+        $(document).ready(function() {            
+            event.preventDefault();
+            $('#teamSelectA').html('<option value="">Team auswählen</option>');
+            $('#spielerSelect').html('<option value="">Bitte Spieler auswählen</option>');
+
+            /* Teamnamen von /tget holen ... */
+            var request = $.ajax({
+                 type: 'GET',
+                 url: '/tget',
+                 contentType: 'application/json'
+            })
+
+            /* ... und beide selects damit füllen. */
+            request.done(function(data) {
+                 data.forEach(function(team) {
+                     $('#teamSelectA').append('<option value="' + team.name + '">' + team.name + '</option>'); 
+                     //$('#teamSelectB').append('<option value="' + team.name + '">' + team.name + '</option>'); 
+                 });
+            })
+            request.fail(function(error) {
+                 alert('Es ist ein Fehler aufgetreten.');
+            });
+            
+            /* Doppelte Begegnungen vermeiden */
+            $("#teamSelectA").change(function() {
+                                  
+                event.preventDefault();
+                var team = $("#teamSelectA").val();
+                document.getElementById("teamSelectB").options.length = 0;
+                
+                var gegenspieler = new Array();
+                gegenspieler.push(team);
+                
+                request = $.ajax({
+                    type: 'GET',
+                    url: '/spiel',
+                    contentType: 'application/json'
+                })
+                request.done(function(data) {
+                     data.forEach(function(spiel) {
+
+                         if(team == spiel.teamA)
+                         {
+                            gegenspieler.push(spiel.teamB);
+                         }
+                         else if(team == spiel.teamB)
+                         {
+                            gegenspieler.push(spiel.teamA);
+                         }
+                     });
+                })
+                request.fail(function(error) {
+                     alert('Es ist ein Fehler aufgetreten.');
+                });
+                
+                var f;
+                
+                request = $.ajax({
+                    type: 'GET',
+                    url: '/tget',
+                    contentType: 'application/json'
+                })
+
+                request.done(function(data) {
+                    data.forEach(function(team) {
+                        f=true;
+                        for(var i = 0; i< gegenspieler.length; i++)
+                        {
+                            if(team.name==gegenspieler[i])
+                            f=false;
+                        }
+                        if(f)
+                            $('#teamSelectB').append('<option value="' + team.name + '">' + team.name + '</option>'); 
+                    });
+                })
+                request.fail(function(error) {
+                     alert('Es ist ein Fehler aufgetreten.');
+                });
+            });
+
+            /* Spielstart */
+            $("#teamSelect").submit(function() {
+
+               event.preventDefault();
+               var data = 
+                    { 	
+                        teamA: $('#teamSelectA').val() ,
+                        teamB: $('#teamSelectB').val() ,
+                        aPunkte: 0,
+                        bPunkte: 0
+                     };
+
+                    /* In /spielStart wird ein Spiel mit den beiden teams hinzugefuegt. */
+                    $.ajax({
+                        type: 'POST',
+                        url: '/spielStart',
+                        data: JSON.stringify(data),	//Datentyp
+                        contentType: 'application/json'
+                      }).done(function(){	
+                        /* Wenn ein Spiel hinzugefuegt werden konnte, dann blende die Teamauswahl aus und zeige mir die Spielerauswahl. */
+                        document.getElementById('teamSelect').style.display = 'none';
+                        document.getElementById('home').style.display = 'none';
+                        document.getElementById('eventF').style.display = 'block';
+                        document.getElementById('quit').style.display = 'block';
+
+                        /* Team übergeben ... */
+                        spielerSelectAdd($("#teamSelectA").val());
+                        spielerSelectAdd($("#teamSelectB").val());
+
+                      }).fail(function(event){
+                        alert(data.body + ' konnte nicht hinzugefuegt werden!('+JSON.stringify(event)+')');
+                      });
+            });
+
+            /*  Beim Eintragen eines ticks */
+            $("#eventF").submit(function() {
+
+                event.preventDefault();
+
+                /* Wenn "Punkte" ausgewählt wurde, dann ...  */
+                if( $('#eventSelect').val() == 'punkte' )
+                {
+                    /*  ... Teamauswahl, Spieler und Punktzahl merken ... */
+                    var data = 
+                    { 	
+                        name: $('#spielerSelect').val() ,
+                        punkte: $('#tick').val() ,
+                        teamA: $('#teamSelectA').val() ,
+                        teamB: $('#teamSelectB').val() 
+                     };
+
+                    /* Teamauswahl, Spieler und Punktzahl an die post-Methode /spunkte übergeben. */
+                    $.ajax({
+                        type: 'POST',
+                        url: '/spunkte',
+                        data: JSON.stringify(data),	//Datentyp
+                        contentType: 'application/json'
+                      }).done(function(){	//wenn hinzugefuegt wurde
+                        alert(data.name+' wurde hinzugefügt!');	
+                         $('#eventF')[0].reset();	//Formular zurücksetzen
+                      }).fail(function(event){	//Fehlermeldung
+                        alert(data.name+' konnte nicht hinzugefuegt werden!('+JSON.stringify(event)+')');
+                      });
+                }
+
+                /* Wenn "Manuell" ausgewählt wurde, dann ... */
+                else
+                {
+                    /* ... tick an /livepost übergeben, um den Text zu publishen. */
+                    var data = 
+                    { 	
+                        tick: $('#tick').val() 
+                     };
+                    $.ajax({
+                        type: 'POST',
+                        url: '/livepost',
+                        data: JSON.stringify(data),	//Datentyp
+                        contentType: 'application/json'
+                      }).done(function(){	//wenn hinzugefuegt wurde
+                        alert(data.tick+' wurde hinzugefügt!');	
+                         $('#eventF')[0].reset();	//Formular zurücksetzen
+                      }).fail(function(event){	//Fehlermeldung
+                        alert(data.tick+' konnte nicht hinzugefuegt werden!('+JSON.stringify(event)+')');
+                      });
+                }
+            });
+
+            /* Beim klick des "Beenden"-Buttons ... */
+            $('#quit').on('click', function () {
+                event.preventDefault();
+                var data = 
+                { 	
+                    teamA: $('#teamSelectA').val(),
+                    teamB: $('#teamSelectB').val()
+                };
+                /* ... die Teams an /spielEnde übergeben, um das Spiel auszuwerten. */
+                $.ajax({
+                    type: 'POST',
+                    url: '/spielEnde',
+                    data: JSON.stringify(data),
+                    contentType: 'application/json'
+                  }).done(function(){
+                    /*  Wenn alles geklappt hat die Seite "tget.html" aufrufen und sie mit der jetzigen ersetzen. */
+                    window.location.replace('team.html');
+                  }).fail(function(event){
+                    alert(data.tick+' konnte nicht hinzugefuegt werden!('+JSON.stringify(event)+')');
+                  });
+            });
+            
+            //
+            $('#home').on('click', function () {
+                window.location.replace('index.html');
+            });
+        }); 
+            
+        /*  ... und Spielerliste des Team von /sget holen.  */
+        function spielerSelectAdd(team)
+        {
+            var request = $.ajax({
+                 type: 'GET',
+                 url: '/sget',
+                 contentType: 'application/json'
+            })
+            request.done(function(data) {
+                 data.forEach(function(spieler) {
+
+                     /* Wenn der Spieler im Team ist dann zu Spieler */
+                     if(team==spieler.team)
+                     {
+                         $('#spielerSelect').append('<option value="' + spieler.name + '">' +spieler.team + ' - ' + spieler.name + '</option>'); 
+                     }
+                 });
+            })
+            request.fail(function(error) {
+                 alert('Es ist ein Fehler aufgetreten.');
+            });
+        }
+            
+            
+        </script>
+    </head>
+    <body>
+        <form id='teamSelect' style='display:block' action='/spielStart' method='POST'>
+            <label>Teamauswahl:</label><br>
+            <select id="teamSelectA" name="teamA"></select><br>
+            <select id="teamSelectB" name="teamB"></select><br><br>
+            <input id='teamS' type='submit' value='Start' />
+        </form>
+
+        <form id='eventF' style='display:none' action='/spunkte' method='POST'>
+            <label>Event:</label><br>
+            <select id="spielerSelect" name="spieler"></select><br>
+            <select id="eventSelect" name="event">
+                <option value='punkte'>Punkte</option>
+                <option value='zusatz'>Manuell</option>
+            </select><br>
+            <input type='text' id = 'tick' name='tick'/></br><br>
+            <input id='eventS' type='submit' value='Eintragen' />
+        </form><br>
+        <input id='quit' style='display:none' type='submit' value='Beenden' />
+    
+    
+            <input id='home' style='display:block' type='submit' value='Startseite' />
+    
+    </body>
+</html>

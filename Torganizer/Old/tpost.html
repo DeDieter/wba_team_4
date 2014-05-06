@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+           //Beim "Senden" soll folgendes passieren ...
+            $("#ph").submit(function() {
+
+               event.preventDefault();
+               var data = 
+                    { 	
+                        name: $('#name').val() ,
+                        punkte: 0
+                     };
+                     //AJAX - Methode für das POST
+                    $.ajax({
+                        type: 'POST',
+                        url: '/team',
+                        data: JSON.stringify(data),	//Datentyp
+                        contentType: 'application/json'
+                      }).done(function(){	//wenn hinzugefuegt wurde
+                      }).fail(function(event){	//Fehlermeldung
+                        alert(data.name+' konnte nicht hinzugefuegt werden!('+JSON.stringify(event)+')');
+                      });
+            });
+        });
+    </script>
+</head>
+    <body>
+        <form id='ph' action='/team' method='POST'>
+                 <label>Name</label><input type='text' id = 'name' name='name' value=''/></br>
+                 <br><input type='submit' value='Senden' />
+                 </form>
+        <br><a href="/tget.html">Tabellenausgabe</a>
+    
+    
+        
+        <input id='home' type='submit' value='Startseite' />
+    </body>
+</html>

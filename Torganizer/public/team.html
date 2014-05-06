@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script type="text/javascript" src="/faye/client.js"></script>
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            event.preventDefault();
+            $("#teamF").submit(function() {
+
+               event.preventDefault();
+               var data = 
+                    { 	
+                        name: $('#name').val() ,
+                        punkte: 0
+                     };
+                     //AJAX - Methode für das POST
+                    $.ajax({
+                        type: 'POST',
+                        url: '/team',
+                        data: JSON.stringify(data),	//Datentyp
+                        contentType: 'application/json'
+                      }).done(function(){
+                         $('#teamF')[0].reset();
+                      }).fail(function(event){	//Fehlermeldung
+                        
+                      });
+            });
+            var request = $.ajax({
+                 type: 'GET',
+                 url: '/tget',
+                 contentType: 'application/json'
+            })
+            request.done(function(data) {
+                
+                var temp;
+		for(var i=1; i<data.length; i++) {
+			for(var j=0; j<data.length-i; j++) {
+				if(data[j].punkte<data[j+1].punkte) {
+					temp=data[j];
+					data[j]=data[j+1];
+					data[j+1]=temp;
+				}
+				
+			}
+		}
+                
+                 data.forEach(function(team) {
+                     addTableRow(team);
+                     console.log(team);
+                 });
+            })
+            request.fail(function(error) {
+                 alert('Es ist ein Fehler aufgetreten.');
+            });
+            
+            $('#home').on('click', function () {
+                window.location.replace('index.html');
+            });
+        });
+
+        var client = new Faye.Client('/faye');
+        var subscription = client.subscribe('/team', function(msg) {
+          addTableRow(msg);
+        });
+
+        function addTableRow(team){
+         $('table#tabelle tbody').first().append
+         ('<tr><td>'+team.name+'</td><td>'+team.punkte+'</td></tr>');
+        }; 
+    </script>
+    <title>Tabellausgabe</title>
+</head>
+    <body>
+        <form id='teamF' action='/team' method='POST'>
+                 <label>Name</label><input type='text' id = 'name' name='name' value=''/></br>
+                 <br><input type='submit' value='Senden' />
+                 </form>
+    
+        <table id="tabelle" border="1">
+            <thead>
+                <th>Name</th><th>Punkte</th>
+            </thead>
+            <tbody></tbody>
+        </table>
+        
+        
+        
+        <input id='home' type='submit' value='Startseite' />
+    </body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+            
+           //Beim "Senden" soll folgendes passieren ...
+            $("#ph").submit(function() {
+
+           event.preventDefault();
+               var data = 
+                    { 	
+                        team: $('#teamSelect').val() ,
+                        name: $('#name').val() ,
+                        punkte: 0
+                        
+                     };
+                     //AJAX - Methode für das POST
+                    $.ajax({
+                        type: 'POST',
+                        url: '/spieler',
+                        data: JSON.stringify(data),	//Datentyp
+                        contentType: 'application/json'
+                      }).done(function(){	//wenn hinzugefuegt wurde
+                        window.location.replace('sget.html');
+
+                      }).fail(function(event){	//Fehlermeldung
+                        alert(data.punkte+' AAA konnte nicht hinzugefuegt werden!('+JSON.stringify(event)+')');
+                      });
+            });
+      
+
+            var request = $.ajax({
+                 type: 'GET',
+                 url: '/tget',
+                 contentType: 'application/json'
+            })
+            request.done(function(data) {
+                 data.forEach(function(team) {
+                     addTableRow(team);
+                     console.log(team);
+                 });
+            })
+            request.fail(function(error) {
+                 alert('BBB Es ist ein Fehler aufgetreten.');
+            });
+            $('#home').on('click', function () {
+                window.location.replace('index.html');
+            });
+            
+        });
+
+
+        function addTableRow(team){
+            $('#teamSelect').append('<option value="' + team.name + '">' + team.name + '</option>'); 
+        };
+    </script>
+</head>
+    <body> 
+        <form id='ph' action='spieler' method='POST'>
+            <label>Team: </label><select id="teamSelect" name="team">
+            </select>
+            <br>
+                 <label>Name: </label><input type='text' id = 'name' name='name' value=''/></br>
+                 <br><input type='submit' value='Senden' />
+                 </form>
+        <br><a href="/sget.html">Tabellenausgabe</a>
+    
+        
+        <input id='home' type='submit' value='Startseite' />
+    </body>
+</html>

@@ -273,6 +273,7 @@ function teamPunkteAdd(team, punkte, next)
 
         daba.update({name:team}, {$set:{punkte:punkte}}, function(error, result) {
             if(error) next(error);
+
         });
     });
 }

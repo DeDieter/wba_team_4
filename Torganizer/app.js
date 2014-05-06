@@ -127,15 +127,7 @@ app.post('/spielerPost', function (req, res, next){
 });
 
 app.post('/livePost', function (req, res, next){
-    
-    
-    db.bind("liveticker");
-    var daba = db.liveticker;
-    
-    daba.insert(req.body.tick, function(error, liveticker) {
-		if(error) next(error);
-	});
-    
+
 	livetick(req.body.tick, res, next);
     
 });
@@ -159,61 +151,59 @@ app.get('/liveGet', function (req, res, next){
 });
 
 app.post('/punkte', function (req, res, next){
-    
+    var ObjectId = require('mongoskin').ObjectID;
+    var id = new ObjectId(req.body.id);
     db.bind("spieler");
     var daba = db.spieler;
-    
-    daba.find({name:req.body.name}).toArray(function(error, result) {
+    daba.find({_id: id }).toArray(function(error, result) {
+        
     if(error)
             next(error);
-        else {
-            
-            var p = parseInt(req.body.punkte, 10) + parseInt(result[0].punkte, 10);
-            
-                        var team = result[0].team;
-            daba.update({name:req.body.name}, {$set:{punkte:p}}, function(error, result)
+        else
+        {
+            var spieler = result[0].name;
+            var p = parseInt(req.body.punkte, 10) + parseInt(result[0].punkte, 10); //10 wieso
+            var team = result[0].team;
+            daba.update({_id:id}, {$set:{punkte:p}}, function(error, result)
             {
                 if(error) next(error);
                 else
                 {
-                    livetick('' + req.body.name + ' hat ' + req.body.punkte + ' Punkte gemacht', res, next);
+                    livetick('' + spieler + ' hat ' + req.body.punkte + ' Punkte gemacht', res, next);
                     db.bind("spiel");
-                        var daba = db.spiel;
+                    var daba = db.spiel;
 
-                        if(req.body.teamA == team)
+                    if(req.body.teamA == team)
+                    {
+                        teamA = teamA + parseInt(req.body.punkte, 10);
+                        daba.update({teamA:req.body.teamA, teamB:req.body.teamB }, {$set:{aPunkte:teamA}}, function(error, result)
                         {
-                            teamA = teamA + parseInt(req.body.punkte, 10);
-                            daba.update({teamA:req.body.teamA, teamB:req.body.teamB }, {$set:{aPunkte:teamA}}, function(error, result)
-                            {
-                                if(error) next(error);
-                            });
-                        }
-                        else
-                        {
-                            teamB = teamB + parseInt(req.body.punkte, 10);
-                            daba.update({teamA:req.body.teamA, teamB:req.body.teamB }, {$set:{bPunkte:teamB}}, function(error, result)
-                            {
-                                if(error) next(error);
-                            });
-                        }
-                    
-                        /* Publish Zwischenstand des Spiels */
-                        livetick(req.body.teamA + '  -  '  + teamA + ' : ' + teamB + '  -  ' + req.body.teamB, res, next);
-
+                            if(error) next(error);
+                        });
                     }
-                });
-            
-            
-             
+                    else
+                    {
+                        teamB = teamB + parseInt(req.body.punkte, 10);
+                        daba.update({teamA:req.body.teamA, teamB:req.body.teamB }, {$set:{bPunkte:teamB}}, function(error, result)
+                        {
+                            if(error) next(error);
+                        });
+                    }
 
-            }
-        }); 
-    });   
+                    /* Publish Zwischenstand des Spiels */
+                    livetick(req.body.teamA + '  -  '  + teamA + ' : ' + teamB + '  -  ' + req.body.teamB, res, next);
+
+                }
+            });
+         }
+    });
+});   
 
 app.post('/spielStart', function (req, res, next){
     
     teamA = 0;
     teamB = 0;
+    
     db.bind("spiel");
     var daba = db.spiel;
     
@@ -238,16 +228,14 @@ app.post('/spielEnde', function (req, res, next){
     
     var gewinner;
     
-    if(teamA>teamB){
-        
-       
+    if(teamA>teamB)
+    {
         gewinner = req.body.teamA;
         teamPunkteAdd(req.body.teamA, 3, next);  
     }
     
     else if(teamA==teamB)
     {
-        
         gewinner = 'Niemand';
         teamPunkteAdd(req.body.teamA, 1, next);
         teamPunkteAdd(req.body.teamB, 1, next); 

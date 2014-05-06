@@ -5,13 +5,13 @@
     <script type="text/javascript" src="/faye/client.js"></script>
     <script src="http://code.jquery.com/jquery-latest.js"></script>
     <script type="text/javascript">
-var teamA = 'all';
+        var teamA = 'all';
         $(document).ready(function() {
            //Beim "Senden" soll folgendes passieren ...
             
            event.preventDefault();
             
-            refreshListe();
+           refreshListe();
             
            $('#teamSelect').html('<option value="all">Alle</option>');            
            
@@ -61,7 +61,7 @@ var teamA = 'all';
 
            teamA = $('#teamSelect').val();
            event.preventDefault();
-                refreshListe();
+           refreshListe();
             
             if(teamA == 'all')
                  document.getElementById('spielerF').style.display = 'none';
@@ -148,7 +148,7 @@ var teamA = 'all';
             <label>Team: </label><select id="teamSelect" name="team">
             </select>
         <form id='spielerF' action='spieler' method='POST' style='display:none'>
-                 <label>Name: </label>
+                 <label>Spieler hinzufügen: </label><br>
             <input type='text' id = 'name' name='name' value=''/><br>
             <input type='submit' value='Senden' /> 
                  </form>

@@ -20,7 +20,7 @@
                      //AJAX - Methode für das POST
                     $.ajax({
                         type: 'POST',
-                        url: '/team',
+                        url: '/teamPost',
                         data: JSON.stringify(data),	//Datentyp
                         contentType: 'application/json'
                       }).done(function(){
@@ -31,7 +31,7 @@
             });
             var request = $.ajax({
                  type: 'GET',
-                 url: '/tget',
+                 url: '/teamGet',
                  contentType: 'application/json'
             })
             request.done(function(data) {

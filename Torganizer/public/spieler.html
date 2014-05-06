@@ -5,7 +5,7 @@
     <script type="text/javascript" src="/faye/client.js"></script>
     <script src="http://code.jquery.com/jquery-latest.js"></script>
     <script type="text/javascript">
-var team;
+var teamA = 'all';
         $(document).ready(function() {
            //Beim "Senden" soll folgendes passieren ...
             
@@ -17,7 +17,7 @@ var team;
            
             var request = $.ajax({
                  type: 'GET',
-                 url: '/tget',
+                 url: '/teamGet',
                  contentType: 'application/json'
             })
             
@@ -34,7 +34,7 @@ var team;
                  alert('Es ist ein Fehler aufgetreten.');
             });
         
-        $("#spieler").submit(function() {
+        $("#spielerF").submit(function() {
 
            event.preventDefault();
                var data = 
@@ -47,7 +47,7 @@ var team;
                      //AJAX - Methode für das POST
                     $.ajax({
                         type: 'POST',
-                        url: '/spieler',
+                        url: '/spielerPost',
                         data: JSON.stringify(data),	//Datentyp
                         contentType: 'application/json'
                       }).done(function(){	//wenn hinzugefuegt wurde
@@ -59,10 +59,11 @@ var team;
             });
         $("#teamSelect").change(function() {
 
+           teamA = $('#teamSelect').val();
            event.preventDefault();
                 refreshListe();
             
-            if($("#teamSelect").val() == 'all')
+            if(teamA == 'all')
                  document.getElementById('spielerF').style.display = 'none';
             else
                  document.getElementById('spielerF').style.display = 'block';
@@ -70,23 +71,14 @@ var team;
         });   
             
         var client = new Faye.Client('/faye');
-        var subscription = client.subscribe('/spieler', function(msg) {
-           console.log(team + '   ' + msg.team);
-            if(team == msg.team)
-            {
-                $('table#tabelle tbody').first().append
-                        ('<tr><td>'+msg.name+'</td><td>'+msg.team +'</td><td>'+msg.punkte +'</td></tr>');
-            }
+        var subscription = client.subscribe('/spieler', function(spieler) {
+           console.log(teamA + '   ' + spieler.team);
+                if(teamA == 'all')
+                    addRowAll(spieler);
+                else if(teamA==spieler.team)
+                    addRow(spieler);
         });
             
-            var clientT = new Faye.Client('/faye');
-        var subscription = clientT.subscribe('/team', function(msg) {
-           console.log(team + '   ' + msg.team);
-            if(team == msg.team)
-            {
-                     $('#teamSelect').append('<option value="' + msg.name + '">' + msg.name + '</option>'); 
-            }
-        });
             $('#home').on('click', function () {
                 window.location.replace('index.html');
             });
@@ -95,7 +87,7 @@ var team;
         function refreshListe(){           
             $("#tabelle tr").remove();
             
-            if($("#teamSelect").val() == 'all')
+            if(teamA == 'all')
             {
                 $('table#tabelle thead').first().append
                         ('<tr><th>Team</th><th>Name</th><th>Punkte</th></tr>');
@@ -106,11 +98,10 @@ var team;
                         ('<tr><th>Name</th><th>Punkte</th></tr>');
             }
             
-            team = $('#teamSelect').val();
              
             var request = $.ajax({
                  type: 'GET',
-                 url: '/sget',
+                 url: '/spielerGet',
                  contentType: 'application/json'
             })
             request.done(function(data) {
@@ -128,21 +119,27 @@ var team;
                 
                 data.forEach(function(spieler) {
                     if($("#teamSelect").val() == 'all')
-                    {
-                            $('table#tabelle tbody').first().append
-                            ('<tr><td>'+spieler.team+'</td><td>'+spieler.name +'</td><td>'+spieler.punkte +'</td></tr>');
-                    }
-                    else if(team==spieler.team)
-                    { 
-                        $('table#tabelle tbody').first().append
-                            ('<tr><td>'+spieler.name +'</td><td>'+spieler.punkte +'</td></tr>');
-                    }
+                        addRowAll(spieler);
+                    else if(teamA==spieler.team)
+                        addRow(spieler);
                 });
             })
             request.fail(function(error) {
                  alert('Es ist ein Fehler aufgetreten.');
             });
-        }; 
+        }
+        
+        function addRowAll(spieler) {
+
+            $('table#tabelle tbody').first().append
+                ('<tr><td>'+spieler.team+'</td><td>'+spieler.name +'</td><td>'+spieler.punkte +'</td></tr>');
+            
+            
+        }
+        function addRow(spieler) {
+            $('table#tabelle tbody').first().append
+                ('<tr><td>'+spieler.name +'</td><td>'+spieler.punkte +'</td></tr>');
+        }
     </script>
 </head>
     <body>
@@ -151,7 +148,9 @@ var team;
             <label>Team: </label><select id="teamSelect" name="team">
             </select>
         <form id='spielerF' action='spieler' method='POST' style='display:none'>
-                 <label>Name: </label><input type='text' id = 'name' name='name' value=''/><br><input type='submit' value='Senden' /> 
+                 <label>Name: </label>
+            <input type='text' id = 'name' name='name' value=''/><br>
+            <input type='submit' value='Senden' /> 
                  </form>
     
             <br><br>

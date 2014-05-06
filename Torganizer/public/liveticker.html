@@ -12,7 +12,7 @@
 
             var request = $.ajax({
                  type: 'GET',
-                 url: '/liveget',
+                 url: '/liveGet',
                  contentType: 'application/json'
             })
             request.done(function(data) {
@@ -24,7 +24,7 @@
             request.fail(function(error) {
                  alert('Es ist ein Fehler aufgetreten.');
             });
-            /* Beim klick des "Beenden"-Buttons ... */
+            
             $('#home').on('click', function () {
                 window.location.replace('index.html');
             });

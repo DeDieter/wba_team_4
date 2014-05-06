@@ -6,6 +6,8 @@ var app = express();
 var faye = require('faye');
 var server = http.createServer(app);
 var mongoDB = require('mongoskin');
+var teamA;
+var teamB;
 
 var bayeux = new faye.NodeAdapter({
     mount: '/faye',
@@ -27,7 +29,7 @@ var db = mongoDB.db('mongodb://localhost/Torganizer?auto_reconnect=true', {
     safe: true
 });
 
-app.get('/tget', function (req, res, next){
+app.get('/teamGet', function (req, res, next){
     
     
     db.bind("team");
@@ -45,7 +47,7 @@ app.get('/tget', function (req, res, next){
     });
 });
 
-app.get('/spiel', function (req, res, next){
+app.get('/spielGet', function (req, res, next){
     
     
     db.bind("spiel");
@@ -63,26 +65,7 @@ app.get('/spiel', function (req, res, next){
     });
 });
 
-app.get('/tabelleget', function (req, res, next){
-    
-    
-    db.bind("team");
-    var daba = db.team;
-    
-    
-    daba.findItems(function(error, result) {
-        if(error)
-            next(error);
-        else {
-            res.writeHead(200, {
-                'Content-Type': 'application/json'
-            });
-            res.end(JSON.stringify(result));
-        } 
-    });
-});
-
-app.get('/sget', function (req, res, next){
+app.get('/spielerGet', function (req, res, next){
     
     db.bind("spieler");
     var daba = db.spieler;
@@ -99,7 +82,7 @@ app.get('/sget', function (req, res, next){
     });
 });
 
-app.post('/team', function (req, res, next){
+app.post('/teamPost', function (req, res, next){
     
     
     db.bind("team");
@@ -117,9 +100,11 @@ app.post('/team', function (req, res, next){
 	}, function(error) {
 		next(error);
 	});
+    
+    livetick(req.body.name + ' nimmt am Tunier teil', res, next);
 });
 
-app.post('/spieler', function (req, res, next){
+app.post('/spielerPost', function (req, res, next){
     
     db.bind("spieler");
     var daba = db.spieler;
@@ -137,9 +122,11 @@ app.post('/spieler', function (req, res, next){
 	}, function(error) {
 		next(error);
 	});
+    
+    livetick(req.body.name + ' hat sich dem Team "' + req.body.team + '" angeschlossen', res, next);
 });
 
-app.post('/livepost', function (req, res, next){
+app.post('/livePost', function (req, res, next){
     
     
     db.bind("liveticker");
@@ -153,7 +140,7 @@ app.post('/livepost', function (req, res, next){
     
 });
 
-app.get('/liveget', function (req, res, next){
+app.get('/liveGet', function (req, res, next){
     
     
     db.bind("liveticker");
@@ -171,10 +158,7 @@ app.get('/liveget', function (req, res, next){
     });
 });
 
-var teamA;
-var teamB;
-
-app.post('/spunkte', function (req, res, next){
+app.post('/punkte', function (req, res, next){
     
     db.bind("spieler");
     var daba = db.spieler;
@@ -237,8 +221,6 @@ app.post('/spielStart', function (req, res, next){
 		if(error) next(error);
 	});    
     
-    livetick('Spielbeginn - ' + req.body.teamA + ' vs. ' + req.body.teamB + '!', res, next);
-    
     var publication = pubClient.publish('/spiel', req.body);
 	
 	publication.then(function() {
@@ -247,6 +229,8 @@ app.post('/spielStart', function (req, res, next){
 	}, function(error) {
 		next(error);
 	});
+    
+    livetick('Spielbeginn - ' + req.body.teamA + ' vs. ' + req.body.teamB + '!', res, next);
     
 });
 
@@ -289,8 +273,6 @@ function teamPunkteAdd(team, punkte, next)
 
         daba.update({name:team}, {$set:{punkte:punkte}}, function(error, result) {
             if(error) next(error);
-            else console.log('Spiel beendet - gespeichert!');
-
         });
     });
 }

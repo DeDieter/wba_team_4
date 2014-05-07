@@ -12,7 +12,7 @@
 
             var request = $.ajax({
                  type: 'GET',
-                 url: '/spielGet',
+                 url: '/spiel',
                  contentType: 'application/json'
             })
             request.done(function(data) {
@@ -31,8 +31,8 @@
         });
 
         var client = new Faye.Client('/faye');
-        var subscription = client.subscribe('/spiel', function(msg) {
-          addTableRow(msg);
+        var subscription = client.subscribe('/spiel', function(spiel) {
+          addTableRow(spiel);
         });
 
         function addTableRow(spiel){
@@ -43,13 +43,9 @@
     <title>Tabellausgabe</title>
 </head>
     <body>
-    
         <table id="tabelle" border="1">
             <tbody></tbody>
         </table>
-        
-        
-        
         <input id='home' type='submit' value='Startseite' />
     </body>
 </html>

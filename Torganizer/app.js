@@ -29,27 +29,8 @@ var db = mongoDB.db('mongodb://localhost/Torganizer?auto_reconnect=true', {
     safe: true
 });
 
-app.get('/teamGet', function (req, res, next){
-    
-    
-    db.bind("team");
-    var daba = db.team;
-    
-    daba.findItems(function(error, result) {
-        if(error)
-            next(error);
-        else {
-            res.writeHead(200, {
-                'Content-Type': 'application/json'
-            });
-            res.end(JSON.stringify(result));
-        } 
-    });
-});
-
-app.get('/spielGet', function (req, res, next){
-    
-    
+app.get('/spiel', function (req, res, next)
+{
     db.bind("spiel");
     var daba = db.spiel;
     
@@ -65,8 +46,25 @@ app.get('/spielGet', function (req, res, next){
     });
 });
 
-app.get('/spielerGet', function (req, res, next){
+app.get('/teamliste', function (req, res, next)
+{
+    db.bind("team");
+    var daba = db.team;
     
+    daba.findItems(function(error, result) {
+        if(error)
+            next(error);
+        else {
+            res.writeHead(200, {
+                'Content-Type': 'application/json'
+            });
+            res.end(JSON.stringify(result));
+        } 
+    });
+});
+
+app.get('/spielerliste', function (req, res, next)
+{
     db.bind("spieler");
     var daba = db.spieler;
     
@@ -82,125 +80,105 @@ app.get('/spielerGet', function (req, res, next){
     });
 });
 
-app.post('/teamPost', function (req, res, next){
-    
-    
+app.post('/teamliste', function (req, res, next)
+{
     db.bind("team");
     var daba = db.team;
     
     daba.insert(req.body, function(error, team) {
-		if(error) next(error);
-	});
+        if(error) next(error);
+    });
     
-	var publication = pubClient.publish('/team', req.body);
+    var publication = pubClient.publish('/team', req.body);
 	
-	publication.then(function() {
-		res.writeHead(200, 'OK');
-		res.end();
-	}, function(error) {
-		next(error);
-	});
+    publication.then(function() {
+        res.writeHead(200, 'OK');
+        res.end();
+    }, function(error) {
+        next(error);
+    });
     
-    livetick(req.body.name + ' nimmt am Tunier teil', res, next);
+    console.log(req.body.name + ' nimmt am Turnier teil');
+    
 });
 
-app.post('/spielerPost', function (req, res, next){
-    
+app.post('/spielerliste', function (req, res, next)
+{
     db.bind("spieler");
     var daba = db.spieler;
 
     daba.insert(req.body, function(error, spieler) {
-		if(error) next(error);
-	});
+        if(error) next(error);
+    });
     
-    
-	var publication = pubClient.publish('/spieler', req.body);
+    var publication = pubClient.publish('/spieler', req.body);
 	
-	publication.then(function() {
-		res.writeHead(200, 'OK');
+    publication.then(function() {
+        res.writeHead(200, 'OK');
         res.end();
-	}, function(error) {
-		next(error);
-	});
+    }, function(error) {
+        next(error);
+    });
     
-    livetick(req.body.name + ' hat sich dem Team "' + req.body.team + '" angeschlossen', res, next);
+    console.log(req.body.name + ' hat sich dem Team "' + req.body.team + '" angeschlossen');
+    
 });
 
-app.post('/livePost', function (req, res, next){
-
+app.post('/liveticker', function (req, res, next)
+{
 	livetick(req.body.tick, res, next);
     
 });
 
-app.get('/liveGet', function (req, res, next){
-    
-    
-    db.bind("liveticker");
-    var daba = db.liveticker;
-    
-    daba.findItems(function(error, result) {
-        if(error)
-            next(error);
-        else {
-            res.writeHead(200, {
-                'Content-Type': 'application/json'
-            });
-            res.end(JSON.stringify(result));
-        } 
-    });
-});
-
-app.post('/punkte', function (req, res, next){
+app.post('/punkte', function (req, res, next)
+{
+    /* Die id (req.body.id) wird in eine ObjectId umgewandelt*/
     var ObjectId = require('mongoskin').ObjectID;
     var id = new ObjectId(req.body.id);
+    
     db.bind("spieler");
     var daba = db.spieler;
+    
+    /* Vom gefundenen Spieler ... */
     daba.find({_id: id }).toArray(function(error, result) {
         
     if(error)
             next(error);
         else
         {
+            /* ... werden Name und Team zwischengespeichert */
             var spieler = result[0].name;
-            var p = parseInt(req.body.punkte, 10) + parseInt(result[0].punkte, 10); //10 wieso
             var team = result[0].team;
+            /* Die alten Punkte (result[0].punkte) werden in einen Integer umgewandelt
+            und auf die neuen gemachten Punkte (req.body.punkte) addiert */
+            var p = parseInt(req.body.punkte, 10) + parseInt(result[0].punkte, 10);
+            
+            /* Die neuen Punkte des Spielers werden in der Tabelle "spieler" aktualisiert */
             daba.update({_id:id}, {$set:{punkte:p}}, function(error, result)
             {
                 if(error) next(error);
                 else
                 {
+                    /* Publish den Spieler und Punkte-Anzahl */
                     livetick('' + spieler + ' hat ' + req.body.punkte + ' Punkte gemacht', res, next);
-                    db.bind("spiel");
-                    var daba = db.spiel;
-
+                    
+                    /* Das Team des Spielers bekommt die Punkte ebenfalls gutgeschrieben */
                     if(req.body.teamA == team)
-                    {
                         teamA = teamA + parseInt(req.body.punkte, 10);
-                        daba.update({teamA:req.body.teamA, teamB:req.body.teamB }, {$set:{aPunkte:teamA}}, function(error, result)
-                        {
-                            if(error) next(error);
-                        });
-                    }
                     else
-                    {
                         teamB = teamB + parseInt(req.body.punkte, 10);
-                        daba.update({teamA:req.body.teamA, teamB:req.body.teamB }, {$set:{bPunkte:teamB}}, function(error, result)
-                        {
-                            if(error) next(error);
-                        });
-                    }
-
+                    
                     /* Publish Zwischenstand des Spiels */
                     livetick(req.body.teamA + '  -  '  + teamA + ' : ' + teamB + '  -  ' + req.body.teamB, res, next);
-
+                    
                 }
             });
          }
     });
 });   
 
-app.post('/spielStart', function (req, res, next){
-    
+app.post('/spielStart', function (req, res, next)
+{
     teamA = 0;
     teamB = 0;
     
@@ -211,32 +189,25 @@ app.post('/spielStart', function (req, res, next){
 		if(error) next(error);
 	});    
     
-    var publication = pubClient.publish('/spiel', req.body);
-	
-	publication.then(function() {
-		res.writeHead(200, 'OK');
-		res.end();
-	}, function(error) {
-		next(error);
-	});
-    
     livetick('Spielbeginn - ' + req.body.teamA + ' vs. ' + req.body.teamB + '!', res, next);
     
 });
 
-app.post('/spielEnde', function (req, res, next){
-    
+app.post('/spielEnde', function (req, res, next)
+{
     var gewinner;
-    
+    /* Der Gewinner wird ermittelt */
     if(teamA>teamB)
     {
         gewinner = req.body.teamA;
+        /* 3 Punkte bei Sieg */
         teamPunkteAdd(req.body.teamA, 3, next);  
     }
     
     else if(teamA==teamB)
     {
         gewinner = 'Niemand';
+        /* 1 Punkt bei Unentschieden */
         teamPunkteAdd(req.body.teamA, 1, next);
         teamPunkteAdd(req.body.teamB, 1, next); 
     }
@@ -246,6 +217,15 @@ app.post('/spielEnde', function (req, res, next){
         teamPunkteAdd(req.body.teamB, 3, next); 
     }
 
+    db.bind("spiel");
+    var daba = db.spiel;
+    
+    /* Tabelle "spiel" mit den neuen Punkten der Teams dieser Begegnung aktualisieren */
+    daba.update({teamA:req.body.teamA, teamB:req.body.teamB }, {$set:{aPunkte: teamA, bPunkte:teamB}}, function(error, result)
+    {
+        if(error) next(error);
+    });
+    
     livetick('Spielende - ' + gewinner + ' gewinnt!', res, next);
     
 });
@@ -261,28 +241,20 @@ function teamPunkteAdd(team, punkte, next)
 
         daba.update({name:team}, {$set:{punkte:punkte}}, function(error, result) {
             if(error) next(error);
-
         });
     });
 }
 
 function livetick(tick, res, next)
 {
-    db.bind("liveticker");
-    var daba = db.liveticker;
-
-    daba.insert({tick:tick}, function(error, liveticker) {
-        if(error) next(error);
-    });
-    
     var publication = pubClient.publish('/liveticker', tick);
-	
-	publication.then(function() {
-		res.writeHead(200, 'OK');
-		res.end();
+    
+    publication.then(function() {
+        res.writeHead(200, 'OK');
+        res.end();
 	}, function(error) {
-		next(error);
-	});
+        next(error);
+    });
 }
     
 server.listen(3000);

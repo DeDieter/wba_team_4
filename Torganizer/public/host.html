@@ -9,10 +9,10 @@
             $('#teamSelectA').html('<option value="">Team auswählen</option>');
             $('#spielerSelect').html('<option value="no">Bitte Spieler auswählen</option>');
 
-            /* Teamnamen von /tget holen ... */
+            /* Teamnamen von /teamliste holen ... */
             var request = $.ajax({
                  type: 'GET',
-                 url: '/teamGet',
+                 url: '/teamliste',
                  contentType: 'application/json'
             })
 
@@ -30,28 +30,28 @@
             $("#teamSelectA").change(function() {
                                   
                 event.preventDefault();
-                var team = $("#teamSelectA").val(), gegenspieler = new Array();
+                var team = $("#teamSelectA").val(), gegner = new Array();
                 document.getElementById('teamS').style.display = 'block';
                 document.getElementById('teamSelectB').style.display = 'block';
                 document.getElementById("teamSelectB").options.length = 0;
-                gegenspieler.push(team);
+                gegner.push(team);
                 
                 request = $.ajax({
                     type: 'GET',
-                    url: '/spielGet',
+                    url: '/spiel',
                     contentType: 'application/json'
                 })
                 /* Überprüfe bei jedem team, ob es schon gespielt hat */
                 request.done(function(data) {
                      data.forEach(function(spiel) {
-                         /* Wenn ja, dann push die Gegenspieler auf das Array */
+                         /* Wenn ja, dann push die Gegner auf das Array */
                          if(team == spiel.teamA)
                          {
-                            gegenspieler.push(spiel.teamB);
+                            gegner.push(spiel.teamB);
                          }
                          else if(team == spiel.teamB)
                          {
-                            gegenspieler.push(spiel.teamA);
+                            gegner.push(spiel.teamA);
                          }
                      });
                 })
@@ -62,17 +62,17 @@
                 /* Teamliste noch einmal aufrufen und ... */
                 request = $.ajax({
                     type: 'GET',
-                    url: '/teamGet',
+                    url: '/teamliste',
                     contentType: 'application/json'
                 })
                 request.done(function(data) {
                     data.forEach(function(team) {
                         var f=true;
-                        /* ... mit den Gegenspielern vergleichen */
-                        for(var i = 0; i< gegenspieler.length; i++)
+                        /* ... mit den Gegner vergleichen */
+                        for(var i = 0; i< gegner.length; i++)
                         {
                             /* Wenn die Teams schon gegeneinander gespielt haben, setze "f" auf false, sonst ... */
-                            if(team.name==gegenspieler[i])
+                            if(team.name==gegner[i])
                                 f=false;
                         }
                         /* ... füge das Team als möglicher Gegner in "teamSelectB" hinzu */
@@ -88,20 +88,20 @@
             /* Spielstart */
             $("#teamSelect").submit(function() {
 
-               event.preventDefault();
-               var data = 
-                    { 	
-                        teamA: $('#teamSelectA').val() ,
-                        teamB: $('#teamSelectB').val() ,
-                        aPunkte: 0,
-                        bPunkte: 0
-                     };
+                event.preventDefault();
+                var data = 
+                {
+                    teamA: $('#teamSelectA').val() ,
+                    teamB: $('#teamSelectB').val() ,
+                    aPunkte: 0,
+                    bPunkte: 0
+                };
 
                     /* In /spielStart wird ein Spiel mit den beiden teams hinzugefuegt. */
                     $.ajax({
                         type: 'POST',
                         url: '/spielStart',
-                        data: JSON.stringify(data),	//Datentyp
+                        data: JSON.stringify(data),
                         contentType: 'application/json'
                       }).done(function(){	
                         /* Wenn ein Spiel hinzugefuegt werden konnte, dann blende die Teamauswahl aus und zeige mir die Spielerauswahl. */
@@ -111,8 +111,8 @@
                         document.getElementById('quit').style.display = 'block';
 
                         /* Teams übergeben ... */
-                        spielerSelectAdd($("#teamSelectA").val());
-                        spielerSelectAdd($("#teamSelectB").val());
+                        spielerSelectAdd(data.teamA);
+                        spielerSelectAdd(data.teamB);
 
                       }).fail(function(event){
                         alert(data.body + ' konnte nicht hinzugefuegt werden!('+JSON.stringify(event)+')');
@@ -131,7 +131,6 @@
                         /*  ... Teamauswahl, Spieler und Punktzahl merken ... */
                         var data = 
                         { 	
-//                          name: $('#spielerSelect').val() ,
                             id: $('#spielerSelect').val() ,
                             punkte: $('#tick').val() ,
                             teamA: $('#teamSelectA').val() ,
@@ -142,13 +141,12 @@
                         $.ajax({
                             type: 'POST',
                             url: '/punkte',
-                            data: JSON.stringify(data),	//Datentyp
+                            data: JSON.stringify(data),
                             contentType: 'application/json'
-                          }).done(function(){	//wenn hinzugefuegt wurde
-                             $('#eventF')[0].reset();	//Formular zurücksetzen
-
-                        document.getElementById('spielerSelect').style.display = 'none';
-                          }).fail(function(event){	//Fehlermeldung
+                          }).done(function(){
+                            $('#eventF')[0].reset();
+                            document.getElementById('spielerSelect').style.display = 'none';
+                          }).fail(function(event){
                             alert(data.name+' konnte nicht hinzugefuegt werden!('+JSON.stringify(event)+')');
                           });
                     }
@@ -160,21 +158,20 @@
                 /* Wenn "Manuell" ausgewählt wurde, dann ... */
                 else
                 {
-                    /* ... tick an /livePost übergeben, um den Text zu publishen. */
+                    /* ... tick an /liveticker übergeben, um den Text zu publishen. */
                     var data = 
                     { 	
                         tick: $('#tick').val() 
-                     };
+                    };
                     $.ajax({
                         type: 'POST',
-                        url: '/livePost',
-                        data: JSON.stringify(data),	//Datentyp
+                        url: '/liveticker',
+                        data: JSON.stringify(data),
                         contentType: 'application/json'
-                      }).done(function(){	//wenn hinzugefuegt wurde
-                         $('#eventF')[0].reset();	//Formular zurücksetzen
-
+                      }).done(function(){
+                         $('#eventF')[0].reset();
                             document.getElementById('spielerSelect').style.display = 'none';
-                      }).fail(function(event){	//Fehlermeldung
+                      }).fail(function(event){
                         alert(data.tick+' konnte nicht hinzugefuegt werden!('+JSON.stringify(event)+')');
                       });
                 }
@@ -220,12 +217,12 @@
             
         }); 
             
-        /*  ... und Spielerliste von /spielerGet holen.  */
+        /*  ... und Spielerliste von /spielerliste holen.  */
         function spielerSelectAdd(team)
         {
             var request = $.ajax({
                  type: 'GET',
-                 url: '/spielerGet',
+                 url: '/spielerliste',
                  contentType: 'application/json'
             })
             request.done(function(data) {

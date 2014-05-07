@@ -10,39 +10,21 @@
 
             event.preventDefault();
 
-            var request = $.ajax({
-                 type: 'GET',
-                 url: '/liveGet',
-                 contentType: 'application/json'
-            })
-            request.done(function(data) {
-                 data.forEach(function(ticker) {
-                     addTableRow(ticker);
-                     console.log(ticker);
-                 });
-            })
-            request.fail(function(error) {
-                 alert('Es ist ein Fehler aufgetreten.');
-            });
-            
             $('#home').on('click', function () {
                 window.location.replace('index.html');
             });
         });
 
         var client = new Faye.Client('/faye');
-        var subscription = client.subscribe('/liveticker', function(msg) {
-         $('table#tabelle tbody').first().append
-         ('<tr><td>'+msg+'</td></tr>');
+        var subscription = client.subscribe('/liveticker', function(tick) {
+            $('table#tabelle tbody').first().append
+            ('<tr><td>'+tick+'</td></tr>');
         });
 
         function addTableRow(ticker){
-         $('table#tabelle tbody').first().append
-         ('<tr><td>'+ticker.tick+'</td></tr>');
+            $('table#tabelle tbody').first().append
+            ('<tr><td>'+ticker.tick+'</td></tr>');
         }; 
-        
-        
-        
     </script>
     <title>Tabellausgabe</title>
 </head>
